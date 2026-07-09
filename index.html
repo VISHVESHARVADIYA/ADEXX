@@ -67,9 +67,7 @@
     <nav class="max-w-7xl mx-auto glass-panel rounded-full px-6 py-3 flex items-center justify-between border-white/5 bg-brand-dark/40 backdrop-blur-md">
       <!-- Brand Logo -->
       <a href="#hero" class="flex items-center gap-3 group magnet-target" id="nav-logo">
-        <img src="assets/images/adex-logos-white.png" alt="AdeX" class="h-6 md:h-7 w-auto object-contain drop-shadow-[0_0_12px_rgba(101,149,255,0.4)] group-hover:scale-105 transition-transform duration-300" draggable="false">
-        <div class="hidden sm:block h-5 w-[1px] bg-white/10 mx-1"></div>
-        <span class="hidden sm:inline-block font-display text-[10px] tracking-[0.25em] text-brand-slate uppercase opacity-80 group-hover:opacity-100 transition-opacity">Design • Strategy • Growth</span>
+        <img src="/assets/images/adex new logo.png" alt="AdeX" class="h-12 md:h-14 w-auto object-contain drop-shadow-[0_0_12px_rgba(101,149,255,0.4)] group-hover:scale-105 transition-transform duration-300">
       </a>
 
       <!-- Navigation Links (Desktop) -->
@@ -199,7 +197,7 @@
           <div class="flex items-start justify-between">
             <div class="flex items-center gap-3">
               <div class="flex-shrink-0 drop-shadow-[0_0_12px_rgba(101,149,255,0.4)] group-hover:scale-105 transition-transform duration-300">
-                <img src="assets/images/adex-logos-white.png" alt="AdeX" class="h-10 sm:h-12 w-auto object-contain drop-shadow-[0_0_14px_rgba(101,149,255,0.45)] transition-transform duration-300 group-hover:scale-105" draggable="false">
+                <img src="/assets/images/adex new logo.png" alt="AdeX" class="h-16 w-auto object-contain">
               </div>
             </div>
             <div class="w-12 h-12 rounded-full bg-brand-highlight/10 flex items-center justify-center border border-brand-highlight/20">
@@ -849,7 +847,7 @@
                 <i data-lucide="check-circle" class="w-10 h-10 animate-bounce"></i>
               </div>
               <h3 class="font-display font-extrabold text-2xl tracking-tight mb-2">ONBOARDING CONFIRMED</h3>
-              <p class="text-white/70 max-w-sm text-sm leading-relaxed mb-6">
+              <p id="success-message" class="text-white/70 max-w-sm text-sm leading-relaxed mb-6">
                 Thank you for coordinating your brand strategy with AdeX. We will review your requirements and follow up with a bespoke proposal within 24 hours.
               </p>
               <button onclick="resetForm()" class="px-6 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-xs uppercase tracking-widest font-semibold transition-colors">
@@ -872,10 +870,10 @@
       <!-- Brand & Copy -->
       <div class="flex flex-col items-center md:items-start gap-3">
         <a href="#hero" class="flex items-center gap-2.5 group">
-          <img src="assets/images/adex-logos-white.png" alt="AdeX" class="h-6 w-auto object-contain drop-shadow-[0_0_10px_rgba(101,149,255,0.4)] group-hover:scale-105 transition-transform duration-300" draggable="false">
+          <img src="/assets/images/adex new logo.png" alt="AdeX" class="h-12 w-auto object-contain drop-shadow-[0_0_10px_rgba(101,149,255,0.4)] group-hover:scale-105 transition-transform duration-300">
         </a>
         <p class="text-xs text-white/40">
-          &copy; 2026 AdeX. Design Strategy Growth. All rights reserved.
+          &copy; 2026 AdeX. All rights reserved.
         </p>
       </div>
 
@@ -1115,21 +1113,96 @@
     // LEAD FORM SUBMISSION
     const leadForm = document.getElementById('lead-form');
     const successBox = document.getElementById('success-box');
+    const successMessage = document.getElementById('success-message');
+    const submitBtn = leadForm.querySelector('button[type="submit"]');
 
     leadForm.addEventListener('submit', (e) => {
       e.preventDefault();
       
-      // Submit lead feedback instantly
-      gsap.to(leadForm, { opacity: 0.1, duration: 0.3 });
+      const originalBtnText = submitBtn.innerHTML;
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = 'SENDING REQUEST...';
       
-      setTimeout(() => {
-        successBox.classList.remove('hidden');
-        gsap.fromTo(successBox, { opacity: 0, scale: 0.95 }, { opacity: 1, scale: 1, duration: 0.4, ease: 'back.out(1.2)' });
-      }, 400);
+      const payload = {
+        name: document.getElementById('name').value,
+        email: document.getElementById('email').value,
+        phone: document.getElementById('phone').value,
+        service: document.getElementById('service-select').value,
+        message: document.getElementById('message').value
+      };
+
+      // Remove any existing error message
+      const existingError = document.getElementById('form-error-msg');
+      if (existingError) existingError.remove();
+
+      gsap.to(leadForm, { opacity: 0.4, duration: 0.3 });
+
+      fetch('/api/submit-lead', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then(data => {
+        // Reset button state
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalBtnText;
+
+        if (data.success) {
+          // Customize success message
+          if (data.mocked) {
+            successMessage.innerHTML = `
+              Thank you for coordinating your brand strategy with AdeX.<br><br>
+              <span class="text-xs text-amber-400 bg-amber-400/10 border border-amber-400/20 px-3 py-2 rounded-lg inline-block text-left mt-2 leading-relaxed">
+                <strong>Developer Note:</strong> The submission details were successfully received and logged to the server console.<br>
+                To send a real email to <strong>adexcreative1010@gmail.com</strong>, please set up <strong>SMTP_USER</strong> and <strong>SMTP_PASS</strong> environment variables.
+              </span>
+            `;
+          } else {
+            successMessage.innerHTML = `
+              Thank you for coordinating your brand strategy with AdeX. We have sent your consultation request details directly to <strong>adexcreative1010@gmail.com</strong>.<br><br>
+              We will review your requirements and follow up with a bespoke proposal within 24 hours.
+            `;
+          }
+
+          gsap.to(leadForm, { opacity: 0.1, duration: 0.2 });
+          setTimeout(() => {
+            successBox.classList.remove('hidden');
+            gsap.fromTo(successBox, { opacity: 0, scale: 0.95 }, { opacity: 1, scale: 1, duration: 0.4, ease: 'back.out(1.2)' });
+          }, 200);
+        } else {
+          throw new Error(data.error || 'Something went wrong. Please try again.');
+        }
+      })
+      .catch(error => {
+        console.error('Submission error:', error);
+        
+        // Restore opacity and reset button
+        gsap.to(leadForm, { opacity: 1, duration: 0.3 });
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalBtnText;
+
+        // Inject elegant error text above the button
+        const errorDiv = document.createElement('div');
+        errorDiv.id = 'form-error-msg';
+        errorDiv.className = 'text-red-400 text-xs bg-red-400/10 border border-red-400/20 px-4 py-3 rounded-xl mb-2 animate-pulse';
+        errorDiv.innerText = `Submission failed: ${error.message || 'Please check your connection.'}`;
+        leadForm.insertBefore(errorDiv, submitBtn);
+      });
     });
 
     function resetForm() {
       leadForm.reset();
+      const existingError = document.getElementById('form-error-msg');
+      if (existingError) existingError.remove();
+      
       gsap.to(successBox, { opacity: 0, scale: 0.95, duration: 0.3, onComplete: () => {
         successBox.classList.add('hidden');
         gsap.to(leadForm, { opacity: 1, duration: 0.3 });
