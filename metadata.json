@@ -1,0 +1,8 @@
+{
+  "name": "AdeX Marketing",
+  "description": "Premium digital marketing agency landing page with elegant glassmorphism, 3D interactive animations, custom cursors, and custom transitions.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

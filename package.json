@@ -1,0 +1,16 @@
+{
+  "name": "adex-demo-1",
+  "version": "1.0.0",
+  "description": "Agencee – Premium Framer Marketing Template",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "dev": "node server.js",
+    "build": "echo 'No compilation needed for static HTML site'",
+    "start": "node server.js",
+    "lint": "echo 'No linting required'"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}
