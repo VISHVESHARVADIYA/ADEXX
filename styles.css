@@ -23,11 +23,17 @@
   padding: 0;
 }
 
-/* Hide standard cursor for the premium experience only on devices with mouse (pointer: fine) */
-@media (pointer: fine) {
-  html, body, a, button, select, input, textarea, .accordion-trigger, .glass-card {
-    cursor: none !important;
-  }
+/* Hide standard cursor only when a mouse is actively being used (safeguard for touch-screens and hybrid systems) */
+body.has-mouse,
+body.has-mouse a,
+body.has-mouse button,
+body.has-mouse select,
+body.has-mouse input,
+body.has-mouse textarea,
+body.has-mouse .accordion-trigger,
+body.has-mouse .glass-card,
+body.has-mouse [data-hover-magnetic] {
+  cursor: none !important;
 }
 
 html {
@@ -139,9 +145,9 @@ body {
   top: 0;
   left: 0;
   pointer-events: none;
-  z-index: 9999;
+  z-index: 99999;
   transition: width 0.2s, height 0.2s, background-color 0.2s;
-  display: none; /* Hide by default, show only if a fine pointer (mouse) is present */
+  display: none; /* Hide by default, shown only when mouse moves */
   align-items: center;
   justify-content: center;
 }
@@ -155,16 +161,14 @@ body {
   top: 0;
   left: 0;
   pointer-events: none;
-  z-index: 10000;
+  z-index: 100000;
   box-shadow: 0 0 10px var(--color-highlight), 0 0 20px var(--color-accent);
-  transition: transform 0.05s linear;
-  display: none; /* Hide by default */
+  display: none; /* Hide by default, shown only when mouse moves */
 }
 
-@media (pointer: fine) {
-  #custom-cursor, #custom-cursor-dot {
-    display: flex;
-  }
+body.has-mouse #custom-cursor,
+body.has-mouse #custom-cursor-dot {
+  display: flex;
 }
 
 /* Hover effects for cursor */

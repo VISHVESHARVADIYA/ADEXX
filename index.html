@@ -67,7 +67,7 @@
     <nav class="max-w-7xl mx-auto glass-panel rounded-full px-6 py-3 flex items-center justify-between border-white/5 bg-brand-dark/40 backdrop-blur-md">
       <!-- Brand Logo -->
       <a href="#hero" class="flex items-center gap-3 group magnet-target" id="nav-logo">
-        <img src="./assets/images/adex new logo.png" alt="AdeX" class="h-12 md:h-14 w-auto object-contain drop-shadow-[0_0_12px_rgba(101,149,255,0.4)] group-hover:scale-105 transition-transform duration-300">
+        <img src="./assets/images/adex-new-logo.png" alt="AdeX" class="h-12 md:h-14 w-auto object-contain drop-shadow-[0_0_12px_rgba(101,149,255,0.4)] group-hover:scale-105 transition-transform duration-300">
       </a>
 
       <!-- Navigation Links (Desktop) -->
@@ -197,7 +197,7 @@
           <div class="flex items-start justify-between">
             <div class="flex items-center gap-3">
               <div class="flex-shrink-0 drop-shadow-[0_0_12px_rgba(101,149,255,0.4)] group-hover:scale-105 transition-transform duration-300">
-                <img src="./assets/images/adex new logo.png" alt="AdeX" class="h-16 w-auto object-contain">
+                <img src="./assets/images/adex-new-logo.png" alt="AdeX" class="h-16 w-auto object-contain">
               </div>
             </div>
             <div class="w-12 h-12 rounded-full bg-brand-highlight/10 flex items-center justify-center border border-brand-highlight/20">
@@ -870,7 +870,7 @@
       <!-- Brand & Copy -->
       <div class="flex flex-col items-center md:items-start gap-3">
         <a href="#hero" class="flex items-center gap-2.5 group">
-          <img src="./assets/images/adex new logo.png" alt="AdeX" class="h-12 w-auto object-contain drop-shadow-[0_0_10px_rgba(101,149,255,0.4)] group-hover:scale-105 transition-transform duration-300">
+          <img src="./assets/images/adex-new-logo.png" alt="AdeX" class="h-12 w-auto object-contain drop-shadow-[0_0_10px_rgba(101,149,255,0.4)] group-hover:scale-105 transition-transform duration-300">
         </a>
         <p class="text-xs text-white/40">
           &copy; 2026 AdeX. All rights reserved.
@@ -898,58 +898,48 @@
     const cursor = document.getElementById('custom-cursor');
     const cursorDot = document.getElementById('custom-cursor-dot');
     
-    // Check if device supports touch natively or has pointer: coarse
-    const hasCoarsePointer = window.matchMedia('(pointer: coarse)').matches;
-    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0 || hasCoarsePointer;
-    
-    if (isTouchDevice) {
-      if (cursor) cursor.style.display = 'none';
-      if (cursorDot) cursorDot.style.display = 'none';
-      document.body.style.cursor = 'auto';
-      // Disable cursor none rules
-      const styles = document.createElement('style');
-      styles.innerHTML = `* { cursor: auto !important; }`;
-      document.head.appendChild(styles);
-    } else {
-      // Set initial centering and keep hidden until the mouse moves to avoid (0,0) jumps on load
-      gsap.set([cursor, cursorDot], { opacity: 0, xPercent: -50, yPercent: -50 });
-      
-      let cursorInitialized = false;
+    let cursorInitialized = false;
 
-      document.addEventListener('mousemove', (e) => {
-        if (!cursorInitialized) {
-          gsap.to([cursor, cursorDot], { opacity: 1, duration: 0.2 });
-          cursorInitialized = true;
-        }
+    document.addEventListener('mousemove', (e) => {
+      if (!cursorInitialized) {
+        // Real mouse movement detected - enable custom cursor experience
+        document.body.classList.add('has-mouse');
+        gsap.set([cursor, cursorDot], { opacity: 0, xPercent: -50, yPercent: -50 });
+        gsap.to([cursor, cursorDot], { opacity: 1, duration: 0.3 });
+        cursorInitialized = true;
+      }
 
-        // Use GSAP to update cursorDot instantly (x and y) to avoid transform/centering conflicts
-        gsap.set(cursorDot, {
-          x: e.clientX,
-          y: e.clientY
-        });
-        
-        // Lag arrowhead slightly for organic premium tracking
-        gsap.to(cursor, {
-          x: e.clientX,
-          y: e.clientY,
-          duration: 0.15,
-          ease: 'power2.out'
-        });
+      // Position dot instantly
+      gsap.set(cursorDot, {
+        x: e.clientX,
+        y: e.clientY
       });
+      
+      // Smoothly lag arrowhead for premium organic tracking
+      gsap.to(cursor, {
+        x: e.clientX,
+        y: e.clientY,
+        duration: 0.15,
+        ease: 'power2.out'
+      });
+    });
 
-      // Hover feedback states
-      const hoverables = document.querySelectorAll('a, button, select, input, textarea, .accordion-trigger, .glass-card');
-      hoverables.forEach(el => {
-        el.addEventListener('mouseenter', () => {
+    // Hover feedback states
+    const hoverables = document.querySelectorAll('a, button, select, input, textarea, .accordion-trigger, .glass-card, [data-hover-magnetic]');
+    hoverables.forEach(el => {
+      el.addEventListener('mouseenter', () => {
+        if (cursorInitialized) {
           document.body.classList.add('cursor-hover');
           gsap.to(cursorDot, { scale: 1.5, xPercent: -50, yPercent: -50, backgroundColor: '#ffffff', duration: 0.15 });
-        });
-        el.addEventListener('mouseleave', () => {
+        }
+      });
+      el.addEventListener('mouseleave', () => {
+        if (cursorInitialized) {
           document.body.classList.remove('cursor-hover');
           gsap.to(cursorDot, { scale: 1, xPercent: -50, yPercent: -50, backgroundColor: '#6595ff', duration: 0.15 });
-        });
+        }
       });
-    }
+    });
 
     // 3D PERSPECTIVE TILT CARD EFFECT
     const perspectiveCards = document.querySelectorAll('.perspective-card');
