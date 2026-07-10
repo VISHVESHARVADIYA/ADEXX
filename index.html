@@ -792,19 +792,21 @@
         <div class="lg:col-span-7">
           <div class="glass-panel rounded-3xl p-8 md:p-12 border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.35)] relative">
             
-            <form id="lead-form" class="flex flex-col gap-6 relative">
+            <form id="lead-form" name="contact" data-netlify="true" class="flex flex-col gap-6 relative">
+              <!-- Hidden input for Netlify Form identification -->
+              <input type="hidden" name="form-name" value="contact">
               
               <!-- Grid layout for inputs -->
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <!-- Name -->
                 <div class="flex flex-col gap-2">
                   <label for="name" class="text-xs uppercase tracking-wider text-white/50 font-semibold">Your Name *</label>
-                  <input type="text" id="name" required class="glass-input px-4 py-3.5 text-sm" placeholder="Dr. Abhi Vidja">
+                  <input type="text" id="name" name="name" required class="glass-input px-4 py-3.5 text-sm" placeholder="Dr. Abhi Vidja">
                 </div>
                 <!-- Email -->
                 <div class="flex flex-col gap-2">
                   <label for="email" class="text-xs uppercase tracking-wider text-white/50 font-semibold">Your Email *</label>
-                  <input type="email" id="email" required class="glass-input px-4 py-3.5 text-sm" placeholder="name@domain.com">
+                  <input type="email" id="email" name="email" required class="glass-input px-4 py-3.5 text-sm" placeholder="name@domain.com">
                 </div>
               </div>
 
@@ -812,12 +814,12 @@
                 <!-- Phone -->
                 <div class="flex flex-col gap-2">
                   <label for="phone" class="text-xs uppercase tracking-wider text-white/50 font-semibold">Phone Number</label>
-                  <input type="tel" id="phone" class="glass-input px-4 py-3.5 text-sm" placeholder="+91 76000 82170">
+                  <input type="tel" id="phone" name="phone" class="glass-input px-4 py-3.5 text-sm" placeholder="+91 76000 82170">
                 </div>
                 <!-- Service Choice -->
                 <div class="flex flex-col gap-2">
                   <label for="service-select" class="text-xs uppercase tracking-wider text-white/50 font-semibold">Service Required</label>
-                  <select id="service-select" class="glass-input px-4 py-3.5 text-sm bg-brand-dark/90 text-white select-custom">
+                  <select id="service-select" name="service" class="glass-input px-4 py-3.5 text-sm bg-brand-dark/90 text-white select-custom">
                     <option value="SMM" class="bg-brand-dark">Social Media Management</option>
                     <option value="CREATION" class="bg-brand-dark">Content Creation</option>
                     <option value="GRAPHICS" class="bg-brand-dark">Graphic Designing</option>
@@ -831,7 +833,7 @@
               <!-- Message -->
               <div class="flex flex-col gap-2">
                 <label for="message" class="text-xs uppercase tracking-wider text-white/50 font-semibold">How can we assist you? *</label>
-                <textarea id="message" required rows="4" class="glass-input px-4 py-3.5 text-sm resize-none" placeholder="Let us know what digital objectives you would like us to target..."></textarea>
+                <textarea id="message" name="message" required rows="4" class="glass-input px-4 py-3.5 text-sm resize-none" placeholder="Let us know what digital objectives you would like us to target..."></textarea>
               </div>
 
               <!-- Submit button -->
@@ -1141,13 +1143,13 @@
         submitBtn.disabled = true;
         submitBtn.innerHTML = 'SENDING REQUEST...';
         
-        const payload = {
-          name: document.getElementById('name').value,
-          email: document.getElementById('email').value,
-          phone: document.getElementById('phone').value,
-          service: document.getElementById('service-select').value,
-          message: document.getElementById('message').value
-        };
+        const payload = new URLSearchParams();
+        payload.append('form-name', 'contact');
+        payload.append('name', document.getElementById('name').value);
+        payload.append('email', document.getElementById('email').value);
+        payload.append('phone', document.getElementById('phone').value);
+        payload.append('service', document.getElementById('service-select').value);
+        payload.append('message', document.getElementById('message').value);
 
         // Remove any existing error message
         const existingError = document.getElementById('form-error-msg');
@@ -1155,49 +1157,33 @@
 
         gsap.to(leadForm, { opacity: 0.4, duration: 0.3 });
 
-        fetch('/api/submit-lead', {
+        // Submit to the same page via URL-encoded form data as required by Netlify Forms
+        fetch('/', {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/x-www-form-urlencoded'
           },
-          body: JSON.stringify(payload)
+          body: payload.toString()
         })
         .then(response => {
           if (!response.ok) {
             throw new Error('Network response was not ok');
           }
-          return response.json();
-        })
-        .then(data => {
+          
           // Reset button state
           submitBtn.disabled = false;
           submitBtn.innerHTML = originalBtnText;
 
-          if (data.success) {
-            // Customize success message
-            if (data.mocked) {
-              successMessage.innerHTML = `
-                Thank you for coordinating your brand strategy with AdeX.<br><br>
-                <span class="text-xs text-amber-400 bg-amber-400/10 border border-amber-400/20 px-3 py-2 rounded-lg inline-block text-left mt-2 leading-relaxed">
-                  <strong>Developer Note:</strong> The submission details were successfully received and logged to the server console.<br>
-                  To send a real email to <strong>adexcreative1010@gmail.com</strong>, please set up <strong>SMTP_USER</strong> and <strong>SMTP_PASS</strong> environment variables.
-                </span>
-              `;
-            } else {
-              successMessage.innerHTML = `
-                Thank you for coordinating your brand strategy with AdeX. We have sent your consultation request details directly to <strong>adexcreative1010@gmail.com</strong>.<br><br>
-                We will review your requirements and follow up with a bespoke proposal within 24 hours.
-              `;
-            }
+          successMessage.innerHTML = `
+            Thank you for coordinating your brand strategy with AdeX. We have submitted your request securely through Netlify Forms to <strong>adexcreative1010@gmail.com</strong>.<br><br>
+            We will review your requirements and follow up with a bespoke proposal within 24 hours.
+          `;
 
-            gsap.to(leadForm, { opacity: 0.1, duration: 0.2 });
-            setTimeout(() => {
-              successBox.classList.remove('hidden');
-              gsap.fromTo(successBox, { opacity: 0, scale: 0.95 }, { opacity: 1, scale: 1, duration: 0.4, ease: 'back.out(1.2)' });
-            }, 200);
-          } else {
-            throw new Error(data.error || 'Something went wrong. Please try again.');
-          }
+          gsap.to(leadForm, { opacity: 0.1, duration: 0.2 });
+          setTimeout(() => {
+            successBox.classList.remove('hidden');
+            gsap.fromTo(successBox, { opacity: 0, scale: 0.95 }, { opacity: 1, scale: 1, duration: 0.4, ease: 'back.out(1.2)' });
+          }, 200);
         })
         .catch(error => {
           console.error('Submission error:', error);
